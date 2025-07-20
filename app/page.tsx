@@ -47,7 +47,11 @@ export default function Home() {
       .from('expenses')
       .insert([
         {
-          ...expenseData,
+          title: expenseData.title,
+          amount: expenseData.amount,
+          category: expenseData.category,
+          date: expenseData.date,
+          description: expenseData.description,
           payment_method: expenseData.paymentMethod,
         },
       ])
@@ -75,7 +79,11 @@ export default function Home() {
       const { data, error } = await supabase
         .from('expenses')
         .update({
-          ...expenseData,
+          title: expenseData.title,
+          amount: expenseData.amount,
+          category: expenseData.category,
+          date: expenseData.date,
+          description: expenseData.description,
           payment_method: expenseData.paymentMethod,
         })
         .eq('id', editingExpense.id)
