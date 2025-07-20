@@ -83,8 +83,9 @@ export function ExpenseForm({ onSubmit, onCancel, initialData, isEditing = false
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Expense Title</label>
+            <label htmlFor="expense-title" className="block text-sm font-medium mb-1">Expense Title</label>
             <Input
+              id="expense-title"
               type="text"
               placeholder="e.g., Chicken Feed Purchase"
               value={formData.title}
@@ -94,8 +95,9 @@ export function ExpenseForm({ onSubmit, onCancel, initialData, isEditing = false
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Amount (₹)</label>
+            <label htmlFor="expense-amount" className="block text-sm font-medium mb-1">Amount (₹)</label>
             <Input
+              id="expense-amount"
               type="number"
               placeholder="0.00"
               value={formData.amount}
@@ -107,8 +109,9 @@ export function ExpenseForm({ onSubmit, onCancel, initialData, isEditing = false
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Category</label>
+            <label htmlFor="expense-category" className="block text-sm font-medium mb-1">Category</label>
             <Select
+              id="expense-category"
               value={formData.category}
               onChange={(e) => setFormData({ ...formData, category: e.target.value as ExpenseCategory })}
               required
@@ -122,8 +125,9 @@ export function ExpenseForm({ onSubmit, onCancel, initialData, isEditing = false
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Date</label>
+            <label htmlFor="expense-date" className="block text-sm font-medium mb-1">Date</label>
             <Input
+              id="expense-date"
               type="date"
               value={formData.date}
               onChange={(e) => setFormData({ ...formData, date: e.target.value })}
@@ -132,8 +136,9 @@ export function ExpenseForm({ onSubmit, onCancel, initialData, isEditing = false
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Payment Method</label>
+            <label htmlFor="expense-payment-method" className="block text-sm font-medium mb-1">Payment Method</label>
             <Select
+              id="expense-payment-method"
               value={formData.paymentMethod}
               onChange={(e) => setFormData({ ...formData, paymentMethod: e.target.value as PaymentMethod })}
               required
@@ -147,8 +152,9 @@ export function ExpenseForm({ onSubmit, onCancel, initialData, isEditing = false
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Description (Optional)</label>
+            <label htmlFor="expense-description" className="block text-sm font-medium mb-1">Description (Optional)</label>
             <textarea
+              id="expense-description"
               className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 min-h-[80px]"
               placeholder="Additional details about this expense..."
               value={formData.description}
