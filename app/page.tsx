@@ -52,6 +52,9 @@ export default function Home() {
         },
       ])
       .select()
+    if (error) {
+      console.error('Supabase insert error:', error)
+    }
     if (!error && data && data[0]) {
       setExpenses([ { ...data[0], date: new Date(data[0].date), paymentMethod: data[0].payment_method }, ...expenses ])
       setShowForm(false)
@@ -77,6 +80,9 @@ export default function Home() {
         })
         .eq('id', editingExpense.id)
         .select()
+      if (error) {
+        console.error('Supabase update error:', error)
+      }
       if (!error && data && data[0]) {
         setExpenses(
           expenses.map(exp =>
