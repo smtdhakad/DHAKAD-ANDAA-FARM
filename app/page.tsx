@@ -9,59 +9,101 @@ import { Button } from '@/components/ui/Button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Expense } from '@/types'
 import { BarChart3, List, Plus, X } from 'lucide-react'
+import { supabase } from '@/lib/supabaseClient'
 
 export default function Home() {
   const [expenses, setExpenses] = useState<Expense[]>([])
   const [showForm, setShowForm] = useState(false)
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null)
   const [activeTab, setActiveTab] = useState<'dashboard' | 'expenses'>('dashboard')
+  const [loading, setLoading] = useState(false)
 
-  // Load expenses from localStorage on component mount
+  // Fetch expenses from Supabase on mount
   useEffect(() => {
-    const savedExpenses = localStorage.getItem('dhakad-anda-farm-expenses')
-    if (savedExpenses) {
-      const parsedExpenses = JSON.parse(savedExpenses).map((expense: any) => ({
-        ...expense,
-        date: new Date(expense.date)
-      }))
-      setExpenses(parsedExpenses)
+    const fetchExpenses = async () => {
+      setLoading(true)
+      const { data, error } = await supabase
+        .from('expenses')
+        .select('*')
+        .order('date', { ascending: false })
+      if (!error && data) {
+        setExpenses(
+          data.map((expense: any) => ({
+            ...expense,
+            date: new Date(expense.date),
+            paymentMethod: expense.payment_method,
+          }))
+        )
+      }
+      setLoading(false)
     }
+    fetchExpenses()
   }, [])
 
-  // Save expenses to localStorage whenever expenses change
-  useEffect(() => {
-    localStorage.setItem('dhakad-anda-farm-expenses', JSON.stringify(expenses))
-  }, [expenses])
-
-  const handleAddExpense = (expenseData: Omit<Expense, 'id'>) => {
-    const newExpense: Expense = {
-      ...expenseData,
-      id: Date.now().toString(),
+  // Add expense to Supabase
+  const handleAddExpense = async (expenseData: Omit<Expense, 'id'>) => {
+    setLoading(true)
+    const { data, error } = await supabase
+      .from('expenses')
+      .insert([
+        {
+          ...expenseData,
+          payment_method: expenseData.paymentMethod,
+        },
+      ])
+      .select()
+    if (!error && data && data[0]) {
+      setExpenses([ { ...data[0], date: new Date(data[0].date), paymentMethod: data[0].payment_method }, ...expenses ])
+      setShowForm(false)
     }
-    setExpenses([newExpense, ...expenses])
-    setShowForm(false)
+    setLoading(false)
   }
 
+  // Edit expense (open form)
   const handleEditExpense = (expense: Expense) => {
     setEditingExpense(expense)
     setShowForm(true)
   }
 
-  const handleUpdateExpense = (expenseData: Omit<Expense, 'id'>) => {
+  // Update expense in Supabase
+  const handleUpdateExpense = async (expenseData: Omit<Expense, 'id'>) => {
     if (editingExpense) {
-      const updatedExpense: Expense = {
-        ...expenseData,
-        id: editingExpense.id,
+      setLoading(true)
+      const { data, error } = await supabase
+        .from('expenses')
+        .update({
+          ...expenseData,
+          payment_method: expenseData.paymentMethod,
+        })
+        .eq('id', editingExpense.id)
+        .select()
+      if (!error && data && data[0]) {
+        setExpenses(
+          expenses.map(exp =>
+            exp.id === editingExpense.id
+              ? { ...data[0], date: new Date(data[0].date), paymentMethod: data[0].payment_method }
+              : exp
+          )
+        )
+        setEditingExpense(null)
+        setShowForm(false)
       }
-      setExpenses(expenses.map(exp => exp.id === editingExpense.id ? updatedExpense : exp))
-      setEditingExpense(null)
-      setShowForm(false)
+      setLoading(false)
     }
   }
 
-  const handleDeleteExpense = (id: string) => {
+  // Delete expense from Supabase
+  const handleDeleteExpense = async (id: string) => {
     if (confirm('Are you sure you want to delete this expense?')) {
-      setExpenses(expenses.filter(exp => exp.id !== id))
+      setLoading(true)
+      const { error } = await supabase
+        .from('expenses')
+        .delete()
+        .eq('id', id)
+      if (!error) {
+        setExpenses(expenses.filter(exp => exp.id !== id))
+      }
+      setLoading(false)
     }
   }
 
@@ -73,7 +115,6 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header onAddExpense={() => setShowForm(true)} />
-      
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {showForm ? (
           <div className="flex justify-center">
@@ -105,7 +146,6 @@ export default function Home() {
                 Expenses
               </Button>
             </div>
-
             {/* Content */}
             {activeTab === 'dashboard' ? (
               <Dashboard expenses={expenses} />
@@ -128,7 +168,6 @@ export default function Home() {
           </div>
         )}
       </main>
-
       {/* Welcome Message for Empty State */}
       {!showForm && expenses.length === 0 && activeTab === 'dashboard' && (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
